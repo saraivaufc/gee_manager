@@ -71,12 +71,12 @@ class TaskManager(Thread):
 					self.__print()
 					self.__submit_task(tasks)
 					self.update_tasks()
+					time.sleep(self.__interval)
 				except Exception as e:
-					print "Exception: {0}".format(e)
-				time.sleep(self.__interval)
+					print("Exception: {}".format(e))
 
 		process_tasks(self.__tasks_awaiting)
-		print "Finished!!!"
+		print("Finished!!!")
 		sys.exit(0)
 
 	def get_export_class(self):
@@ -87,7 +87,7 @@ class TaskManager(Thread):
 		self.__tasks_awaiting[code] = task
 
 	def update_tasks(self):
-		for code, task in self.__tasks_running.items():
+		for code, task in self.__tasks_running.copy().items():
 			
 			remote_state = task.state
 			remote_info = None
@@ -95,10 +95,10 @@ class TaskManager(Thread):
 			if remote_state == ee.batch.Task.State.UNSUBMITTED:
 				try:
 					task.start()
+					print("Task {code} started!".format(code=task.code))
 					remote_state = ee.batch.Task.State.READY
-					pass
 				except Exception as e:
-					print e
+					print(e)
 					del self.__tasks_running[code]
 					remote_info = t.error_message
 					remote_state = ee.batch.Task.State.FAILED
@@ -133,15 +133,15 @@ class TaskManager(Thread):
 
 	def __print(self):
 		os.system('clear')
-		print "************************* Tasks *************************"
-		print "Awaiting:    {0} tasks".format(len(self.__tasks_awaiting))
-		print "Running:     {0} tasks".format(len(self.__tasks_running))
-		print "Completed:   {0} tasks".format(len(self.__tasks_completed))
-		print "Error:       {0} tasks".format(len(self.__tasks_error))
-		print "Failed:      {0} tasks".format(len(self.__tasks_failed))
-		print "*********************************************************"
-		for code, task in self.__tasks_running.items():
-			print code, "|", task.state
+		print("************************* Tasks *************************")
+		print("Awaiting:    {0} tasks".format(len(self.__tasks_awaiting)))
+		print("Running:     {0} tasks".format(len(self.__tasks_running)))
+		print("Completed:   {0} tasks".format(len(self.__tasks_completed)))
+		print("Error:       {0} tasks".format(len(self.__tasks_error)))
+		print("Failed:      {0} tasks".format(len(self.__tasks_failed)))
+		print("*********************************************************")
+		for code, task in self.__tasks_running.copy().items():
+			print(code, "|", task.state)
 
 	def __generate_task(self, task):
 		if task:
@@ -152,7 +152,7 @@ class TaskManager(Thread):
 		return task
 
 	def __submit_task(self, tasks):
-		for code, task in tasks.items():
+		for code, task in tasks.copy().items():
 			if code in self.__tasks_failed.keys():
 				del tasks[code]
 				continue
@@ -167,5 +167,5 @@ class TaskManager(Thread):
 				self.__tasks_running[code] = new_task
 				del tasks[code]
 			if task.state in [ee.batch.Task.State.READY, ee.batch.Task.State.RUNNING]:
-				print "{0} running in other process".format(code)
+				print("{0} running in other process".format(code))
 				del tasks[code]
