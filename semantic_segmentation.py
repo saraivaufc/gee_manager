@@ -4,7 +4,7 @@ from shapely.geometry import shape
 
 ee.Initialize()
 
-t_manager = TaskManager(export_class=ee.batch.Export.image.toCloudStorage, max_tasks=10, interval=3, max_errors=3)
+t_manager = TaskManager(export_class=ee.batch.Export.image.toCloudStorage, max_tasks=10, interval=1, max_errors=3)
 
 mosaic = ee.ImageCollection("projects/nexgenmap/AGRICULTURE/REFERENCES/mosaics").mosaic()
 gridSamples = ee.FeatureCollection("ft:1HbycFItKP3OVqniiaqCbVWBe-40XgKkuM_3smosq")
@@ -42,7 +42,7 @@ for feature in gridSamples.getInfo()["features"]:
 		print(filename)
 
 		specifications = {
-			'image': image.select("B", "G", "R", "L").int16(),
+			'image': image.select("B", "G", "R", "N", "L").int16(),
 			'description': filename,
 			'bucket': "agrosatelite-mapbiomas",
 			'fileNamePrefix': "unet_samples/" + filename,
